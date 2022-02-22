@@ -1,0 +1,45 @@
+name: Common python github action setup
+
+description: >
+  Common infrastructure setup which checks out code, sets up python and pipenv,
+  and assumes AWS CI role
+
+author: Tess Thyer
+
+inputs:
+
+  python_version:
+    description: version of python to use
+    required: false
+    default: 3.8
+
+runs:
+
+  using: composite
+
+  steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ inputs.python_version }}
+      - name: Install pipenv
+        run: python -m pip install pipenv
+
+      - name: Install dependencies
+        env:
+          PIPENV_NOSPIN: 'true'
+        run: |
+          pipenv install --dev
+
+      - name: Assume AWS role
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.CI_USER_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.CI_USER_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+          role-to-assume: ${{ secrets.CI_ROLE_TO_ASSUME }}
+          role-duration-seconds: 1200
