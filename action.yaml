@@ -32,6 +32,11 @@ inputs:
     required: false
     default: "us-east-1"
 
+  pipenv_working_directory:
+    description: directory to run pipenv commands in
+    required: false
+    default: "."
+
 runs:
 
   using: composite
@@ -54,6 +59,7 @@ runs:
         env:
           PIPENV_NOSPIN: 'true'
         shell: bash
+        working-directory: ${{ inputs.pipenv_working_directory }}
         run: |
           pipenv install --dev
 
